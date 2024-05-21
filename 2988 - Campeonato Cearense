@@ -1,0 +1,30 @@
+WITH team_matches AS (
+    SELECT 
+        id, 
+        name, 
+        (SELECT COUNT(*) FROM matches WHERE team_1 = teams.id OR team_2 = teams.id) AS matches,
+        (SELECT COUNT(*) FROM matches WHERE (team_1 = teams.id AND team_1_goals > team_2_goals) OR (team_2 = teams.id AND team_2_goals > team_1_goals)) AS victories,
+        (SELECT COUNT(*) FROM matches WHERE (team_1 = teams.id AND team_1_goals < team_2_goals) OR (team_2 = teams.id AND team_2_goals < team_1_goals)) AS defeats,
+        (SELECT COUNT(*) FROM matches WHERE (team_1 = teams.id OR team_2 = teams.id) AND team_1_goals = team_2_goals) AS draws
+    FROM teams
+),
+team_scores AS (
+    SELECT 
+        id, 
+        name, 
+        matches, 
+        victories, 
+        defeats, 
+        draws, 
+        (victories * 3 + draws) AS score
+    FROM team_matches
+)
+SELECT 
+    name, 
+    matches, 
+    victories, 
+    defeats, 
+    draws, 
+    score
+FROM team_scores
+ORDER BY score DESC;
